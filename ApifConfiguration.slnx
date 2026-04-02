@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ApifConfiguration/ApifConfiguration.csproj" />
+  <Project Path="ApifConfigurationTests/ApifConfigurationTests.csproj" />
+</Solution>

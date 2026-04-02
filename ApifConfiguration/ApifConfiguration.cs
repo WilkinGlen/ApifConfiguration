@@ -25,13 +25,7 @@ public sealed class ApifConfiguration : IConfigurationSection
     public string? Value
     {
         get => this.section?.Value;
-        set
-        {
-            if (this.section is not null)
-            {
-                this.section.Value = value;
-            }
-        }
+        set => this.section?.Value = value;
     }
 
     public string? this[string key]
@@ -45,7 +39,10 @@ public sealed class ApifConfiguration : IConfigurationSection
         set => this.configuration[key] = value;
     }
 
-    public string Get(string key) => this[key]!;
+    public string Get(string key)
+    {
+        return this[key]!;
+    }
 
     public T? Get<T>()
     {
@@ -54,11 +51,11 @@ public sealed class ApifConfiguration : IConfigurationSection
 
     public T? GetValue<T>(string key)
     {
-        var section = this.configuration.GetSection(key);
+        var configSection = this.configuration.GetSection(key);
 
-        return string.IsNullOrEmpty(section.Value)
+        return string.IsNullOrEmpty(configSection.Value)
             ? throw new ConfigurationKeyNotFoundException(key)
-            : section.Get<T>();
+            : configSection.Get<T>();
     }
 
     public T GetValue<T>(string key, T defaultValue)
@@ -73,21 +70,21 @@ public sealed class ApifConfiguration : IConfigurationSection
 
     public void Bind(string sectionKey, object instance)
     {
-        var section = this.configuration.GetSection(sectionKey);
+        var configSection = this.configuration.GetSection(sectionKey);
 
-        if (!section.Exists())
+        if (!configSection.Exists())
         {
             throw new ConfigurationKeyNotFoundException(sectionKey);
         }
 
-        section.Bind(instance);
+        configSection.Bind(instance);
     }
 
     public IConfigurationSection GetSection(string key)
     {
-        var section = this.configuration.GetSection(key);
+        var configSection = this.configuration.GetSection(key);
 
-        return section.Exists() ? new ApifConfiguration(section) : throw new ConfigurationKeyNotFoundException(key);
+        return configSection.Exists() ? new ApifConfiguration(configSection) : throw new ConfigurationKeyNotFoundException(key);
     }
 
     public ApifConfiguration GetRequiredSection(string key)
@@ -104,9 +101,9 @@ public sealed class ApifConfiguration : IConfigurationSection
 
     public IEnumerable<IConfigurationSection> GetChildren()
     {
-        foreach (var section in this.configuration.GetChildren())
+        foreach (var configSection in this.configuration.GetChildren())
         {
-            yield return new ApifConfiguration(section);
+            yield return new ApifConfiguration(configSection);
         }
     }
 

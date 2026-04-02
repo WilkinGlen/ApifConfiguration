@@ -21,7 +21,10 @@ public sealed class OptionalConfiguration
         }
     }
 
-    public string? Get(string key) => this[key];
+    public string? Get(string key)
+    {
+        return this[key];
+    }
 
     public T? GetValue<T>(string key)
     {

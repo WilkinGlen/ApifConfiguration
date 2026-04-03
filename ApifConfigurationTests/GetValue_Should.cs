@@ -123,43 +123,53 @@ public sealed class GetValue_Should
     }
 
     [Fact]
-    public void ReturnDefault_WhenKeyIsMissing()
+    public void Throw_WhenKeyIsMissingWithDefault()
     {
         var config = Build([]);
 
-        _ = config.GetValue("missing", 99).Should().Be(99);
+        Action act = () => config.GetValue("missing", 99);
+        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
+            .Which.Key.Should().Be("missing");
     }
 
     [Fact]
-    public void ReturnStringDefault_WhenKeyIsMissing()
+    public void Throw_WhenStringKeyIsMissingWithDefault()
     {
         var config = Build([]);
 
-        _ = config.GetValue("missing", "fallback").Should().Be("fallback");
+        Action act = () => config.GetValue("missing", "fallback");
+        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
+            .Which.Key.Should().Be("missing");
     }
 
     [Fact]
-    public void ReturnBoolDefault_WhenKeyIsMissing()
+    public void Throw_WhenBoolKeyIsMissingWithDefault()
     {
         var config = Build([]);
 
-        _ = config.GetValue("missing", true).Should().BeTrue();
+        Action act = () => config.GetValue("missing", true);
+        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
+            .Which.Key.Should().Be("missing");
     }
 
     [Fact]
-    public void ReturnEnumDefault_WhenKeyIsMissing()
+    public void Throw_WhenEnumKeyIsMissingWithDefault()
     {
         var config = Build([]);
 
-        _ = config.GetValue("missing", TestLevel.Medium).Should().Be(TestLevel.Medium);
+        Action act = () => config.GetValue("missing", TestLevel.Medium);
+        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
+            .Which.Key.Should().Be("missing");
     }
 
     [Fact]
-    public void ReturnDefault_WhenValueIsNull()
+    public void Throw_WhenValueIsNullWithDefault()
     {
         var config = Build(new() { ["count"] = null });
 
-        _ = config.GetValue("count", 99).Should().Be(99);
+        Action act = () => config.GetValue("count", 99);
+        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
+            .Which.Key.Should().Be("count");
     }
 
     [Fact]
@@ -236,6 +246,46 @@ public sealed class GetValue_Should
         var config = Build(new() { ["count"] = null });
 
         _ = config.Optional.GetValue<int>("count").Should().Be(0);
+    }
+
+    [Fact]
+    public void Optional_ReturnTypedValue_WhenKeyExistsWithDefault()
+    {
+        var config = Build(new() { ["count"] = "42" });
+
+        _ = config.Optional.GetValue("count", 99).Should().Be(42);
+    }
+
+    [Fact]
+    public void Optional_ReturnDefault_WhenKeyIsMissingWithDefault()
+    {
+        var config = Build([]);
+
+        _ = config.Optional.GetValue("missing", 99).Should().Be(99);
+    }
+
+    [Fact]
+    public void Optional_ReturnDefault_WhenValueIsNullWithDefault()
+    {
+        var config = Build(new() { ["count"] = null });
+
+        _ = config.Optional.GetValue("count", 99).Should().Be(99);
+    }
+
+    [Fact]
+    public void Optional_ReturnDefault_WhenValueIsEmptyWithDefault()
+    {
+        var config = Build(new() { ["count"] = "" });
+
+        _ = config.Optional.GetValue("count", 99).Should().Be(99);
+    }
+
+    [Fact]
+    public void Optional_ReturnDefault_WhenValueIsUnparseableWithDefault()
+    {
+        var config = Build(new() { ["count"] = "abc" });
+
+        _ = config.Optional.GetValue("count", 99).Should().Be(99);
     }
 
     private enum TestLevel { Low, Medium, High }

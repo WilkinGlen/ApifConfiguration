@@ -49,4 +49,20 @@ public sealed class GetRequiredSection_Should
         _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
             .WithInnerException<InvalidOperationException>();
     }
+
+    [Fact]
+    public void Optional_ReturnApifConfiguration_WhenSectionExists()
+    {
+        var config = Build(new() { ["Section:Key"] = "value" });
+
+        _ = config.Optional.GetRequiredSection("Section").Should().BeOfType<Sut>();
+    }
+
+    [Fact]
+    public void Optional_ReturnNull_WhenSectionIsMissing()
+    {
+        var config = Build([]);
+
+        _ = config.Optional.GetRequiredSection("Missing").Should().BeNull();
+    }
 }

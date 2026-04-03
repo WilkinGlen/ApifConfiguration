@@ -94,4 +94,20 @@ public sealed class GetEnforcingSection_Should
 
         _ = child.Path.Should().Be("parent:child");
     }
+
+    [Fact]
+    public void Optional_ReturnApifConfiguration_WhenSectionExists()
+    {
+        var config = Build(new() { ["section:key"] = "value" });
+
+        _ = config.Optional.GetEnforcingSection("section").Should().BeOfType<Sut>();
+    }
+
+    [Fact]
+    public void Optional_ReturnNull_WhenSectionIsMissing()
+    {
+        var config = Build([]);
+
+        _ = config.Optional.GetEnforcingSection("missing").Should().BeNull();
+    }
 }

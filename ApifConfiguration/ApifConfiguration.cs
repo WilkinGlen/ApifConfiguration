@@ -135,20 +135,30 @@ public sealed class ApifConfiguration : IConfigurationSection, IDisposable
     }
 
     /// <summary>
-    /// Gets a typed value by key, returning <paramref name="defaultValue"/> when the key is absent or <c>null</c>.
+    /// Gets a typed value by key, returning <paramref name="defaultValue"/> only when
+    /// <c>Get&lt;T&gt;()</c> yields <c>null</c> for a present key.
+    /// Throws <see cref="ConfigurationKeyNotFoundException"/> when the key is absent or empty.
+    /// Use <see cref="OptionalConfiguration.GetValue{T}(string, T)"/> to fall back silently.
     /// </summary>
     /// <typeparam name="T">The type to convert the value to.</typeparam>
     /// <param name="key">The configuration key.</param>
-    /// <param name="defaultValue">The fallback value.</param>
-    /// <returns>The converted value, or <paramref name="defaultValue"/> when the key is absent.</returns>
+    /// <param name="defaultValue">The fallback value used when the key is present but binding returns <c>null</c>.</param>
+    /// <returns>The converted value, or <paramref name="defaultValue"/>.</returns>
     /// <exception cref="ConfigurationKeyNotFoundException">
-    /// The value exists but cannot be converted to <typeparamref name="T"/>.
+    /// The key is absent, has an empty value, or the value cannot be converted to <typeparamref name="T"/>.
     /// </exception>
     public T GetValue<T>(string key, T defaultValue)
     {
+        var configSection = this.configuration.GetSection(key);
+
+        if (string.IsNullOrEmpty(configSection.Value))
+        {
+            throw new ConfigurationKeyNotFoundException(key);
+        }
+
         try
         {
-            return this.configuration.GetValue(key, defaultValue)!;
+            return configSection.Get<T>() ?? defaultValue;
         }
         catch (InvalidOperationException ex)
         {

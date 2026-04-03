@@ -54,6 +54,33 @@ public sealed class OptionalConfiguration
     }
 
     /// <summary>
+    /// Gets a typed value by key, returning <paramref name="defaultValue"/> when the key is
+    /// missing, empty, or the value cannot be converted to <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">The type to convert the value to.</typeparam>
+    /// <param name="key">The configuration key.</param>
+    /// <param name="defaultValue">The fallback value.</param>
+    /// <returns>The converted value, or <paramref name="defaultValue"/>.</returns>
+    public T GetValue<T>(string key, T defaultValue)
+    {
+        var section = this.configuration.GetSection(key);
+
+        if (string.IsNullOrEmpty(section.Value))
+        {
+            return defaultValue;
+        }
+
+        try
+        {
+            return section.Get<T>() ?? defaultValue;
+        }
+        catch (InvalidOperationException)
+        {
+            return defaultValue;
+        }
+    }
+
+    /// <summary>
     /// Gets a configuration sub-section by key, returning <c>null</c> when the section does not exist.
     /// </summary>
     /// <param name="key">The section key.</param>
@@ -63,6 +90,28 @@ public sealed class OptionalConfiguration
         var section = this.configuration.GetSection(key);
 
         return section.Exists() ? new ApifConfiguration(section) : null;
+    }
+
+    /// <summary>
+    /// Gets a required configuration sub-section by key, returning <c>null</c> when the section does not exist.
+    /// Non-throwing counterpart of <see cref="ApifConfiguration.GetRequiredSection"/>.
+    /// </summary>
+    /// <param name="key">The section key.</param>
+    /// <returns>An enforcing <see cref="ApifConfiguration"/> wrapping the section, or <c>null</c>.</returns>
+    public ApifConfiguration? GetRequiredSection(string key)
+    {
+        return this.GetSection(key);
+    }
+
+    /// <summary>
+    /// Gets a configuration sub-section by key, returning <c>null</c> when the section does not exist.
+    /// Non-throwing counterpart of <see cref="ApifConfiguration.GetEnforcingSection"/>.
+    /// </summary>
+    /// <param name="key">The section key.</param>
+    /// <returns>An enforcing <see cref="ApifConfiguration"/> wrapping the section, or <c>null</c>.</returns>
+    public ApifConfiguration? GetEnforcingSection(string key)
+    {
+        return this.GetSection(key);
     }
 
     /// <summary>

@@ -34,6 +34,190 @@ string? featureFlag = config.Optional.Get("FeatureFlags:DarkMode");
 
 ---
 
+## Using with ASP.NET Core dependency injection
+
+### Registration
+
+Register `ApifConfiguration` as a singleton in `Program.cs` by wrapping the `IConfiguration` that ASP.NET Core injects automatically:
+
+```csharp
+// Program.cs
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<ApifConfiguration>(
+    sp => new ApifConfiguration(sp.GetRequiredService<IConfiguration>()));
+```
+
+### Eager startup validation
+
+Validate all required keys inside the factory delegate so that a missing or empty value throws **before the application starts accepting requests**:
+
+```csharp
+// Program.cs
+builder.Services.AddSingleton<ApifConfiguration>(sp =>
+{
+    var config = new ApifConfiguration(sp.GetRequiredService<IConfiguration>());
+
+    // Throws ConfigurationKeyNotFoundException at startup if any key is absent.
+    _ = config.GetConnectionString("Default");
+    _ = config.Get("Auth:JwtSecret");
+    _ = config.GetValue<int>("Auth:TokenLifetimeMinutes");
+
+    return config;
+});
+```
+
+### Injecting into services
+
+Declare `ApifConfiguration` as a constructor parameter. The DI container resolves the registered singleton automatically:
+
+```csharp
+public sealed class OrderService
+{
+    private readonly ApifConfiguration config;
+
+    public OrderService(ApifConfiguration config)
+    {
+        this.config = config;
+    }
+
+    public async Task ProcessAsync(Order order)
+    {
+        string endpoint = this.config.Get("Orders:ProcessingEndpoint");
+        int retries     = this.config.GetValue("Orders:MaxRetries", 3);
+        // ...
+    }
+}
+```
+
+Register the service as usual:
+
+```csharp
+builder.Services.AddScoped<OrderService>();
+```
+
+### Injecting into controllers
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public sealed class ProductsController : ControllerBase
+{
+    private readonly ApifConfiguration config;
+    private readonly IProductRepository repository;
+
+    public ProductsController(ApifConfiguration config, IProductRepository repository)
+    {
+        this.config     = config;
+        this.repository = repository;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetPageAsync([FromQuery] int page = 1)
+    {
+        int maxPageSize = this.config.GetValue("Products:MaxPageSize", 50);
+        // ...
+    }
+}
+```
+
+### Binding strongly-typed settings
+
+Create a plain settings class, bind it once at registration time and register the result as its own singleton. Downstream services receive the concrete type instead of `ApifConfiguration`:
+
+```json
+// appsettings.json
+{
+  "Database": {
+    "Host": "localhost",
+    "Port": 5432,
+    "Name": "orders"
+  }
+}
+```
+
+```csharp
+public sealed class DatabaseSettings
+{
+    public string Host { get; set; } = string.Empty;
+    public int    Port { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
+```
+
+```csharp
+// Program.cs — bind and validate the section at startup.
+builder.Services.AddSingleton<DatabaseSettings>(sp =>
+{
+    var config   = sp.GetRequiredService<ApifConfiguration>();
+    var settings = new DatabaseSettings();
+    config.Bind("Database", settings);  // throws if the section is absent
+    return settings;
+});
+```
+
+Inject `DatabaseSettings` directly where it is needed:
+
+```csharp
+public sealed class DatabaseConnectionFactory
+{
+    private readonly DatabaseSettings settings;
+
+    public DatabaseConnectionFactory(DatabaseSettings settings)
+    {
+        this.settings = settings;
+    }
+
+    public string BuildConnectionString() =>
+        $"Host={this.settings.Host};Port={this.settings.Port};Database={this.settings.Name}";
+}
+```
+
+### Scoping access to a single section
+
+Use `GetEnforcingSection` to narrow an `ApifConfiguration` down to one configuration slice before handing it to a service. The service then uses short relative keys and never has access to the rest of the configuration:
+
+```csharp
+// Program.cs
+builder.Services.AddSingleton<IEmailService>(sp =>
+{
+    ApifConfiguration emailConfig =
+        sp.GetRequiredService<ApifConfiguration>().GetEnforcingSection("Email");
+
+    return new SmtpEmailService(emailConfig);
+});
+```
+
+```csharp
+public sealed class SmtpEmailService : IEmailService
+{
+    private readonly string host;
+    private readonly int    port;
+    private readonly string fromAddress;
+
+    public SmtpEmailService(ApifConfiguration emailConfig)
+    {
+        // Keys are relative to the "Email" section.
+        this.host        = emailConfig.Get("Host");
+        this.port        = emailConfig.GetValue<int>("Port");
+        this.fromAddress = emailConfig.Get("FromAddress");
+    }
+}
+```
+
+```json
+// appsettings.json
+{
+  "Email": {
+    "Host": "smtp.example.com",
+    "Port": 587,
+    "FromAddress": "no-reply@example.com"
+  }
+}
+```
+
+---
+
 ## Core concept: enforcing vs optional access
 
 `ApifConfiguration` wraps any `IConfiguration` or `IConfigurationSection` and enforces that every resolved value is present and non-empty. The `.Optional` property exposes the same surface area but returns `null` (or `default(T)`) instead of throwing.
@@ -105,6 +289,12 @@ ApifConfiguration GetRequiredSection(string key)
 
 // Returns the immediate child sections as enforcing ApifConfiguration instances.
 IEnumerable<IConfigurationSection> GetChildren()
+
+// Returns the immediate child sections as ApifConfiguration — no cast needed.
+IEnumerable<ApifConfiguration> GetEnforcingChildren()
+
+// Returns the named section as ApifConfiguration — no cast needed. Throws if missing.
+ApifConfiguration GetEnforcingSection(string key)
 
 // Returns the connection string for name. Throws if missing or empty.
 string GetConnectionString(string name)
@@ -241,11 +431,17 @@ config["AppSettings:Theme"] = "dark";
 ### Working with children
 
 ```csharp
-// Each child is itself a fully enforcing ApifConfiguration.
-foreach (ApifConfiguration child in config.GetChildren().Cast<ApifConfiguration>())
+// GetEnforcingChildren() returns ApifConfiguration directly — no cast needed.
+foreach (ApifConfiguration child in config.GetEnforcingChildren())
 {
     string name = child.Key;
     string val  = child.Get("Value");
+}
+
+// GetChildren() satisfies IConfiguration and returns IConfigurationSection.
+foreach (IConfigurationSection section in config.GetChildren())
+{
+    Console.WriteLine(section.Key);
 }
 ```
 

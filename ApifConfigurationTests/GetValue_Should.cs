@@ -79,6 +79,26 @@ public sealed class GetValue_Should
     }
 
     [Fact]
+    public void WrapInvalidOperationException_WhenValueIsUnparseable()
+    {
+        var config = Build(new() { ["count"] = "abc" });
+
+        Action act = () => config.GetValue<int>("count");
+        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
+            .Which.Key.Should().Be("count");
+    }
+
+    [Fact]
+    public void WrapInvalidOperationException_WithInnerException_WhenValueIsUnparseable()
+    {
+        var config = Build(new() { ["count"] = "abc" });
+
+        Action act = () => config.GetValue<int>("count");
+        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
+            .WithInnerException<InvalidOperationException>();
+    }
+
+    [Fact]
     public void ReturnTypedValue_WhenKeyExistsWithDefault()
     {
         var config = Build(new() { ["count"] = "42" });
@@ -140,6 +160,26 @@ public sealed class GetValue_Should
         var config = Build(new() { ["count"] = null });
 
         _ = config.GetValue("count", 99).Should().Be(99);
+    }
+
+    [Fact]
+    public void WrapInvalidOperationException_WhenValueIsUnparseableWithDefault()
+    {
+        var config = Build(new() { ["count"] = "abc" });
+
+        Action act = () => config.GetValue("count", 99);
+        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
+            .Which.Key.Should().Be("count");
+    }
+
+    [Fact]
+    public void WrapInvalidOperationException_WithInnerException_WhenValueIsUnparseableWithDefault()
+    {
+        var config = Build(new() { ["count"] = "abc" });
+
+        Action act = () => config.GetValue("count", 99);
+        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
+            .WithInnerException<InvalidOperationException>();
     }
 
     [Fact]

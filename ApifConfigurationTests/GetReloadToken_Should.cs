@@ -1,6 +1,6 @@
 namespace ApifConfigurationTests;
 
-using Sut = ApifConfiguration.ApifConfiguration;
+using Sut = ApifConfiguration.ApifConfigurationWrapper;
 
 public sealed class GetReloadToken_Should
 {

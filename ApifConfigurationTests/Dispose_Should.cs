@@ -1,7 +1,7 @@
 namespace ApifConfigurationTests;
 
 using Microsoft.Extensions.Primitives;
-using Sut = ApifConfiguration.ApifConfiguration;
+using Sut = ApifConfiguration.ApifConfigurationWrapper;
 
 public sealed class Dispose_Should
 {

@@ -76,11 +76,16 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     {
         get
         {
+            ArgumentException.ThrowIfNullOrEmpty(key);
             var value = this.configuration[key];
 
             return string.IsNullOrEmpty(value) ? throw new ConfigurationKeyNotFoundException(key) : value;
         }
-        set => this.configuration[key] = value;
+        set
+        {
+            ArgumentException.ThrowIfNullOrEmpty(key);
+            this.configuration[key] = value;
+        }
     }
 
     /// <summary>
@@ -91,6 +96,7 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// <exception cref="ConfigurationKeyNotFoundException">The key is missing or has an empty value.</exception>
     public string Get(string key)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         var value = this.configuration[key];
 
         return string.IsNullOrEmpty(value) ? throw new ConfigurationKeyNotFoundException(key) : value;
@@ -117,6 +123,7 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// </exception>
     public T? GetValue<T>(string key)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         var configSection = this.configuration.GetSection(key);
 
         if (string.IsNullOrEmpty(configSection.Value))
@@ -149,6 +156,7 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// </exception>
     public T GetValue<T>(string key, T defaultValue)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         var configSection = this.configuration.GetSection(key);
 
         if (string.IsNullOrEmpty(configSection.Value))
@@ -172,6 +180,7 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// <param name="instance">The object to bind configuration values to.</param>
     public void Bind(object instance)
     {
+        ArgumentNullException.ThrowIfNull(instance);
         this.configuration.Bind(instance);
     }
 
@@ -183,6 +192,8 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// <exception cref="ConfigurationKeyNotFoundException">The section does not exist.</exception>
     public void Bind(string sectionKey, object instance)
     {
+        ArgumentException.ThrowIfNullOrEmpty(sectionKey);
+        ArgumentNullException.ThrowIfNull(instance);
         var configSection = this.configuration.GetSection(sectionKey);
 
         if (!configSection.Exists())
@@ -203,6 +214,7 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// <exception cref="ConfigurationKeyNotFoundException">The section does not exist.</exception>
     public IConfigurationSection GetSection(string key)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         var configSection = this.configuration.GetSection(key);
 
         return configSection.Exists() ? new ApifConfigurationWrapper(configSection) : throw new ConfigurationKeyNotFoundException(key);
@@ -217,6 +229,8 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// <exception cref="ConfigurationKeyNotFoundException">The section does not exist.</exception>
     public ApifConfigurationWrapper GetRequiredSection(string key)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
+
         try
         {
             return new(this.configuration.GetRequiredSection(key));
@@ -237,6 +251,7 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// <exception cref="ConfigurationKeyNotFoundException">The section does not exist.</exception>
     public ApifConfigurationWrapper GetEnforcingSection(string key)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         var configSection = this.configuration.GetSection(key);
 
         return configSection.Exists() ? new ApifConfigurationWrapper(configSection) : throw new ConfigurationKeyNotFoundException(key);
@@ -276,6 +291,7 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// <exception cref="ConfigurationKeyNotFoundException">The connection string is missing or empty.</exception>
     public string GetConnectionString(string name)
     {
+        ArgumentException.ThrowIfNullOrEmpty(name);
         var value = this.configuration.GetConnectionString(name);
 
         return string.IsNullOrEmpty(value) ? throw new ConfigurationKeyNotFoundException(name) : value;

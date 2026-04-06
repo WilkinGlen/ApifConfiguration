@@ -24,6 +24,7 @@ public sealed class OptionalConfigurationWrapper
     {
         get
         {
+            ArgumentException.ThrowIfNullOrEmpty(key);
             var value = this.configuration[key];
 
             return string.IsNullOrEmpty(value) ? null : value;
@@ -48,6 +49,7 @@ public sealed class OptionalConfigurationWrapper
     /// <returns>The converted value, or <c>default</c>.</returns>
     public T? GetValue<T>(string key)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         var section = this.configuration.GetSection(key);
 
         return string.IsNullOrEmpty(section.Value) ? default : section.Get<T>();
@@ -63,6 +65,7 @@ public sealed class OptionalConfigurationWrapper
     /// <returns>The converted value, or <paramref name="defaultValue"/>.</returns>
     public T GetValue<T>(string key, T defaultValue)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         var section = this.configuration.GetSection(key);
 
         if (string.IsNullOrEmpty(section.Value))
@@ -87,6 +90,7 @@ public sealed class OptionalConfigurationWrapper
     /// <returns>An enforcing <see cref="ApifConfigurationWrapper"/> wrapping the section, or <c>null</c>.</returns>
     public ApifConfigurationWrapper? GetSection(string key)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         var section = this.configuration.GetSection(key);
 
         return section.Exists() ? new ApifConfigurationWrapper(section) : null;
@@ -121,6 +125,7 @@ public sealed class OptionalConfigurationWrapper
     /// <returns>The connection string value, or <c>null</c>.</returns>
     public string? GetConnectionString(string name)
     {
+        ArgumentException.ThrowIfNullOrEmpty(name);
         var value = this.configuration.GetConnectionString(name);
 
         return string.IsNullOrEmpty(value) ? null : value;
@@ -134,6 +139,8 @@ public sealed class OptionalConfigurationWrapper
     /// <param name="instance">The object to bind configuration values to.</param>
     public void Bind(string sectionKey, object instance)
     {
+        ArgumentException.ThrowIfNullOrEmpty(sectionKey);
+        ArgumentNullException.ThrowIfNull(instance);
         var section = this.configuration.GetSection(sectionKey);
 
         if (section.Exists())

@@ -18,6 +18,7 @@ public sealed class ConfigurationKeyNotFoundException : Exception
     public ConfigurationKeyNotFoundException(string key)
         : base($"Required configuration key '{key}' is missing or has no value.")
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         this.Key = key;
     }
 
@@ -30,6 +31,7 @@ public sealed class ConfigurationKeyNotFoundException : Exception
     public ConfigurationKeyNotFoundException(string key, Exception innerException)
         : base($"Required configuration key '{key}' is missing or has no value.", innerException)
     {
+        ArgumentException.ThrowIfNullOrEmpty(key);
         this.Key = key;
     }
 }

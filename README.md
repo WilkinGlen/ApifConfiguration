@@ -84,7 +84,7 @@ public sealed class OrderService
     public async Task ProcessAsync(Order order)
     {
         string endpoint = this.config.Get("Orders:ProcessingEndpoint");
-        int retries     = this.config.GetValue("Orders:MaxRetries", 3);
+        int retries     = this.config.Optional.GetValue("Orders:MaxRetries", 3);
         // ...
     }
 }
@@ -115,7 +115,7 @@ public sealed class ProductsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetPageAsync([FromQuery] int page = 1)
     {
-        int maxPageSize = this.config.GetValue("Products:MaxPageSize", 50);
+        int maxPageSize = this.config.Optional.GetValue("Products:MaxPageSize", 50);
         // ...
     }
 }
@@ -230,6 +230,8 @@ public sealed class SmtpEmailService : IEmailService
 | `config.Optional["key"]` | Returns `null` |
 | `config.GetValue<T>(key)` | Throws `ConfigurationKeyNotFoundException` |
 | `config.Optional.GetValue<T>(key)` | Returns `default(T)` |
+| `config.GetValue(key, defaultValue)` | Throws `ConfigurationKeyNotFoundException` |
+| `config.Optional.GetValue(key, defaultValue)` | Returns `defaultValue` |
 | `config.GetSection(key)` | Throws `ConfigurationKeyNotFoundException` |
 | `config.Optional.GetSection(key)` | Returns `null` |
 | `config.GetConnectionString(name)` | Throws `ConfigurationKeyNotFoundException` |
@@ -271,7 +273,9 @@ T? Get<T>()
 // Returns the typed value for key. Throws if missing or empty.
 T? GetValue<T>(string key)
 
-// Returns the typed value for key, or defaultValue when the key is absent or null.
+// Returns the typed value for key. Throws if the key is absent or empty.
+// defaultValue is used only when the key is present but binding returns null.
+// To fall back silently on a missing key use config.Optional.GetValue<T>(key, defaultValue).
 T GetValue<T>(string key, T defaultValue)
 
 // Populates instance from the root of this configuration.
@@ -321,8 +325,17 @@ string? Get(string key)
 // Returns the typed value for key, or default(T) if missing or empty.
 T? GetValue<T>(string key)
 
+// Returns the typed value for key, or defaultValue if the key is missing, empty, or unparseable.
+T GetValue<T>(string key, T defaultValue)
+
 // Returns an enforcing ApifConfiguration for the named section, or null if missing.
 ApifConfiguration? GetSection(string key)
+
+// Returns an enforcing ApifConfiguration for the required section, or null if missing.
+ApifConfiguration? GetRequiredSection(string key)
+
+// Returns an enforcing ApifConfiguration for the named section, or null if missing.
+ApifConfiguration? GetEnforcingSection(string key)
 
 // Returns the connection string for name, or null if missing or empty.
 string? GetConnectionString(string name)
@@ -372,7 +385,7 @@ bool tls     = config.GetValue<bool>("Database:UseTls");
 
 // Optional — null / default when absent.
 string? overrideHost = config.Optional.Get("Database:HostOverride");
-int     defaultPort  = config.GetValue("Database:Port", 5432);
+int     defaultPort  = config.Optional.GetValue("Database:Port", 5432);
 ```
 
 ### Binding to a settings class

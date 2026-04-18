@@ -2,7 +2,7 @@
 namespace ApifConfigurationTests;
 
 using ApifConfiguration;
-using Sut = ApifConfiguration.ApifConfigurationWrapper;
+using Sut = ApifConfiguration.ApifConfiguration;
 
 public sealed class Get_Should
 {

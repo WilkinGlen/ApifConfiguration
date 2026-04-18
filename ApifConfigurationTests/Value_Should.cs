@@ -1,6 +1,6 @@
 namespace ApifConfigurationTests;
 
-using Sut = ApifConfiguration.ApifConfigurationWrapper;
+using Sut = ApifConfiguration.ApifConfiguration;
 
 public sealed class Value_Should
 {

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 /// <summary>
 /// A non-enforcing accessor that returns <c>null</c> or default values instead of
 /// throwing when a configuration key is missing or empty.
-/// Obtained via <see cref="ApifConfigurationWrapper.Optional"/>.
+/// Obtained via <see cref="ApifConfiguration.Optional"/>.
 /// </summary>
 public sealed class OptionalConfigurationWrapper
 {
@@ -87,33 +87,33 @@ public sealed class OptionalConfigurationWrapper
     /// Gets a configuration sub-section by key, returning <c>null</c> when the section does not exist.
     /// </summary>
     /// <param name="key">The section key.</param>
-    /// <returns>An enforcing <see cref="ApifConfigurationWrapper"/> wrapping the section, or <c>null</c>.</returns>
-    public ApifConfigurationWrapper? GetSection(string key)
+    /// <returns>An enforcing <see cref="ApifConfiguration"/> wrapping the section, or <c>null</c>.</returns>
+    public ApifConfiguration? GetSection(string key)
     {
         ArgumentException.ThrowIfNullOrEmpty(key);
         var section = this.configuration.GetSection(key);
 
-        return section.Exists() ? new ApifConfigurationWrapper(section) : null;
+        return section.Exists() ? new ApifConfiguration(section) : null;
     }
 
     /// <summary>
     /// Gets a required configuration sub-section by key, returning <c>null</c> when the section does not exist.
-    /// Non-throwing counterpart of <see cref="ApifConfigurationWrapper.GetRequiredSection"/>.
+    /// Non-throwing counterpart of <see cref="ApifConfiguration.GetRequiredSection"/>.
     /// </summary>
     /// <param name="key">The section key.</param>
-    /// <returns>An enforcing <see cref="ApifConfigurationWrapper"/> wrapping the section, or <c>null</c>.</returns>
-    public ApifConfigurationWrapper? GetRequiredSection(string key)
+    /// <returns>An enforcing <see cref="ApifConfiguration"/> wrapping the section, or <c>null</c>.</returns>
+    public ApifConfiguration? GetRequiredSection(string key)
     {
         return this.GetSection(key);
     }
 
     /// <summary>
     /// Gets a configuration sub-section by key, returning <c>null</c> when the section does not exist.
-    /// Non-throwing counterpart of <see cref="ApifConfigurationWrapper.GetEnforcingSection"/>.
+    /// Non-throwing counterpart of <see cref="ApifConfiguration.GetEnforcingSection"/>.
     /// </summary>
     /// <param name="key">The section key.</param>
-    /// <returns>An enforcing <see cref="ApifConfigurationWrapper"/> wrapping the section, or <c>null</c>.</returns>
-    public ApifConfigurationWrapper? GetEnforcingSection(string key)
+    /// <returns>An enforcing <see cref="ApifConfiguration"/> wrapping the section, or <c>null</c>.</returns>
+    public ApifConfiguration? GetEnforcingSection(string key)
     {
         return this.GetSection(key);
     }

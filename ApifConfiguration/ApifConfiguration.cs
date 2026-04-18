@@ -9,7 +9,7 @@ using Microsoft.Extensions.Primitives;
 /// Implements <see cref="IConfigurationSection"/> so it can be used as a drop-in replacement
 /// and <see cref="IDisposable"/> to forward disposal to the underlying configuration root.
 /// </summary>
-public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposable
+public sealed class ApifConfiguration : IConfigurationSection, IDisposable
 {
     private readonly IConfiguration configuration;
     private readonly IConfigurationSection? section;
@@ -22,12 +22,12 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     public OptionalConfigurationWrapper Optional => field ??= new OptionalConfigurationWrapper(this.configuration);
 
     /// <summary>
-    /// Initialises a new <see cref="ApifConfigurationWrapper"/> wrapping the supplied
+    /// Initialises a new <see cref="ApifConfiguration"/> wrapping the supplied
     /// <paramref name="configuration"/> instance.
     /// </summary>
     /// <param name="configuration">The underlying configuration to wrap.</param>
     /// <exception cref="ArgumentNullException"><paramref name="configuration"/> is <c>null</c>.</exception>
-    public ApifConfigurationWrapper(IConfiguration configuration)
+    public ApifConfiguration(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         this.configuration = configuration;
@@ -207,27 +207,27 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
     /// <summary>
     /// Gets a configuration sub-section with the specified key, returned as
     /// <see cref="IConfigurationSection"/>. The returned instance is an
-    /// enforcing <see cref="ApifConfigurationWrapper"/>.
+    /// enforcing <see cref="ApifConfiguration"/>.
     /// </summary>
     /// <param name="key">The section key.</param>
-    /// <returns>An enforcing <see cref="ApifConfigurationWrapper"/> wrapping the section.</returns>
+    /// <returns>An enforcing <see cref="ApifConfiguration"/> wrapping the section.</returns>
     /// <exception cref="ConfigurationKeyNotFoundException">The section does not exist.</exception>
     public IConfigurationSection GetSection(string key)
     {
         ArgumentException.ThrowIfNullOrEmpty(key);
         var configSection = this.configuration.GetSection(key);
 
-        return configSection.Exists() ? new ApifConfigurationWrapper(configSection) : throw new ConfigurationKeyNotFoundException(key);
+        return configSection.Exists() ? new ApifConfiguration(configSection) : throw new ConfigurationKeyNotFoundException(key);
     }
 
     /// <summary>
     /// Gets a required configuration sub-section as a strongly-typed
-    /// <see cref="ApifConfigurationWrapper"/> instance.
+    /// <see cref="ApifConfiguration"/> instance.
     /// </summary>
     /// <param name="key">The section key.</param>
-    /// <returns>An enforcing <see cref="ApifConfigurationWrapper"/> wrapping the section.</returns>
+    /// <returns>An enforcing <see cref="ApifConfiguration"/> wrapping the section.</returns>
     /// <exception cref="ConfigurationKeyNotFoundException">The section does not exist.</exception>
-    public ApifConfigurationWrapper GetRequiredSection(string key)
+    public ApifConfiguration GetRequiredSection(string key)
     {
         ArgumentException.ThrowIfNullOrEmpty(key);
 
@@ -243,43 +243,43 @@ public sealed class ApifConfigurationWrapper : IConfigurationSection, IDisposabl
 
     /// <summary>
     /// Gets a required configuration sub-section as a strongly-typed
-    /// <see cref="ApifConfigurationWrapper"/>, avoiding the need to cast from
+    /// <see cref="ApifConfiguration"/>, avoiding the need to cast from
     /// <see cref="IConfigurationSection"/>.
     /// </summary>
     /// <param name="key">The section key.</param>
-    /// <returns>An enforcing <see cref="ApifConfigurationWrapper"/> wrapping the section.</returns>
+    /// <returns>An enforcing <see cref="ApifConfiguration"/> wrapping the section.</returns>
     /// <exception cref="ConfigurationKeyNotFoundException">The section does not exist.</exception>
-    public ApifConfigurationWrapper GetEnforcingSection(string key)
+    public ApifConfiguration GetEnforcingSection(string key)
     {
         ArgumentException.ThrowIfNullOrEmpty(key);
         var configSection = this.configuration.GetSection(key);
 
-        return configSection.Exists() ? new ApifConfigurationWrapper(configSection) : throw new ConfigurationKeyNotFoundException(key);
+        return configSection.Exists() ? new ApifConfiguration(configSection) : throw new ConfigurationKeyNotFoundException(key);
     }
 
     /// <summary>
     /// Gets the immediate descendant configuration sub-sections as
-    /// <see cref="IConfigurationSection"/> instances (each an enforcing <see cref="ApifConfigurationWrapper"/>).
+    /// <see cref="IConfigurationSection"/> instances (each an enforcing <see cref="ApifConfiguration"/>).
     /// </summary>
     /// <returns>The child sections.</returns>
     public IEnumerable<IConfigurationSection> GetChildren()
     {
         foreach (var configSection in this.configuration.GetChildren())
         {
-            yield return new ApifConfigurationWrapper(configSection);
+            yield return new ApifConfiguration(configSection);
         }
     }
 
     /// <summary>
     /// Gets the immediate descendant configuration sub-sections as strongly-typed
-    /// <see cref="ApifConfigurationWrapper"/> instances, avoiding the need to cast.
+    /// <see cref="ApifConfiguration"/> instances, avoiding the need to cast.
     /// </summary>
-    /// <returns>The child sections as <see cref="ApifConfigurationWrapper"/>.</returns>
-    public IEnumerable<ApifConfigurationWrapper> GetEnforcingChildren()
+    /// <returns>The child sections as <see cref="ApifConfiguration"/>.</returns>
+    public IEnumerable<ApifConfiguration> GetEnforcingChildren()
     {
         foreach (var configSection in this.configuration.GetChildren())
         {
-            yield return new ApifConfigurationWrapper(configSection);
+            yield return new ApifConfiguration(configSection);
         }
     }
 

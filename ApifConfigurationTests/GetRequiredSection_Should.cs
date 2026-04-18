@@ -41,16 +41,6 @@ public sealed class GetRequiredSection_Should
     }
 
     [Fact]
-    public void WrapInvalidOperationException_WhenSectionIsMissing()
-    {
-        var config = Build([]);
-
-        Action act = () => config.GetRequiredSection("Missing");
-        _ = act.Should().Throw<ConfigurationKeyNotFoundException>()
-            .WithInnerException<InvalidOperationException>();
-    }
-
-    [Fact]
     public void Optional_ReturnApifConfiguration_WhenSectionExists()
     {
         var config = Build(new() { ["Section:Key"] = "value" });

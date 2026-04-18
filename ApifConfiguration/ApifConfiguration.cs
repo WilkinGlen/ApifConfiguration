@@ -1,4 +1,4 @@
-﻿namespace ApifConfiguration;
+namespace ApifConfiguration;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
@@ -74,13 +74,7 @@ public sealed class ApifConfiguration : IConfigurationSection, IDisposable
     /// <exception cref="ConfigurationKeyNotFoundException">The key is missing or has an empty value.</exception>
     public string? this[string key]
     {
-        get
-        {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-            var value = this.configuration[key];
-
-            return string.IsNullOrEmpty(value) ? throw new ConfigurationKeyNotFoundException(key) : value;
-        }
+        get => this.Get(key);
         set
         {
             ArgumentException.ThrowIfNullOrEmpty(key);
@@ -145,7 +139,7 @@ public sealed class ApifConfiguration : IConfigurationSection, IDisposable
     /// Gets a typed value by key, returning <paramref name="defaultValue"/> only when
     /// <c>Get&lt;T&gt;()</c> yields <c>null</c> for a present key.
     /// Throws <see cref="ConfigurationKeyNotFoundException"/> when the key is absent or empty.
-    /// Use <see cref="OptionalConfigurationWrapper.GetValue{T}(string, T)"/> to fall back silently.
+    /// Use <see cref="OptionalConfiguration.GetValue{T}(string, T)"/> to fall back silently.
     /// </summary>
     /// <typeparam name="T">The type to convert the value to.</typeparam>
     /// <param name="key">The configuration key.</param>
@@ -214,10 +208,7 @@ public sealed class ApifConfiguration : IConfigurationSection, IDisposable
     /// <exception cref="ConfigurationKeyNotFoundException">The section does not exist.</exception>
     public IConfigurationSection GetSection(string key)
     {
-        ArgumentException.ThrowIfNullOrEmpty(key);
-        var configSection = this.configuration.GetSection(key);
-
-        return configSection.Exists() ? new ApifConfiguration(configSection) : throw new ConfigurationKeyNotFoundException(key);
+        return this.GetEnforcingSection(key);
     }
 
     /// <summary>
@@ -229,16 +220,7 @@ public sealed class ApifConfiguration : IConfigurationSection, IDisposable
     /// <exception cref="ConfigurationKeyNotFoundException">The section does not exist.</exception>
     public ApifConfiguration GetRequiredSection(string key)
     {
-        ArgumentException.ThrowIfNullOrEmpty(key);
-
-        try
-        {
-            return new(this.configuration.GetRequiredSection(key));
-        }
-        catch (InvalidOperationException ex)
-        {
-            throw new ConfigurationKeyNotFoundException(key, ex);
-        }
+        return this.GetEnforcingSection(key);
     }
 
     /// <summary>
@@ -264,10 +246,7 @@ public sealed class ApifConfiguration : IConfigurationSection, IDisposable
     /// <returns>The child sections.</returns>
     public IEnumerable<IConfigurationSection> GetChildren()
     {
-        foreach (var configSection in this.configuration.GetChildren())
-        {
-            yield return new ApifConfiguration(configSection);
-        }
+        return this.GetEnforcingChildren();
     }
 
     /// <summary>

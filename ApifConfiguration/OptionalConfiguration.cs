@@ -7,11 +7,11 @@ using Microsoft.Extensions.Configuration;
 /// throwing when a configuration key is missing or empty.
 /// Obtained via <see cref="ApifConfiguration.Optional"/>.
 /// </summary>
-public sealed class OptionalConfigurationWrapper
+public sealed class OptionalConfiguration
 {
     private readonly IConfiguration configuration;
 
-    internal OptionalConfigurationWrapper(IConfiguration configuration)
+    internal OptionalConfiguration(IConfiguration configuration)
     {
         this.configuration = configuration;
     }

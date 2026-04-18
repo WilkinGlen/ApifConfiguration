@@ -19,7 +19,7 @@ public sealed class ApifConfiguration : IConfigurationSection, IDisposable
     /// instead of throwing when a key is missing or empty.
     /// The instance is lazily allocated on first access.
     /// </summary>
-    public OptionalConfigurationWrapper Optional => field ??= new OptionalConfigurationWrapper(this.configuration);
+    public OptionalConfiguration Optional => field ??= new OptionalConfiguration(this.configuration);
 
     /// <summary>
     /// Initialises a new <see cref="ApifConfiguration"/> wrapping the supplied

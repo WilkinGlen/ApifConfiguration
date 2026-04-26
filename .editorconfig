@@ -34,7 +34,7 @@ file_header_template = unset
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = true:error
-dotnet_style_qualification_for_field = true
+dotnet_style_qualification_for_field = true:error
 dotnet_style_qualification_for_method = true:error
 dotnet_style_qualification_for_property = true:error
 
@@ -73,7 +73,8 @@ dotnet_style_prefer_simplified_boolean_expressions = true
 dotnet_style_prefer_simplified_interpolation = true
 
 # Field preferences
-dotnet_style_readonly_field = true
+dotnet_style_readonly_field = true:error
+csharp_style_make_class_sealed_when_possible = true:suggestion
 
 # Parameter preferences
 dotnet_code_quality_unused_parameters = all

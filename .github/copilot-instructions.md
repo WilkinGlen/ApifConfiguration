@@ -10,7 +10,7 @@ ApifConfiguration is a strongly-typed, enforcing wrapper around `Microsoft.Exten
 ## Code Style & Conventions
 
 ### C# Guidelines
-- **Always add braces to `if` statements**, even single-line conditions
+- **Always add braces to `if` statements**, even single-line conditions (enforced as error)
   ```csharp
   // Good
   if (this.section is null)
@@ -22,8 +22,10 @@ ApifConfiguration is a strongly-typed, enforcing wrapper around `Microsoft.Exten
   if (this.section is null)
       throw new InvalidOperationException(...);
   ```
-- **Use file-scoped namespaces** (e.g., `namespace ApifConfiguration;`) - already enforced in .editorconfig
-- **Use sealed classes** (e.g., `public sealed class`) for immutability and performance
+- **Use file-scoped namespaces** (e.g., `namespace ApifConfiguration;`) - enforced in .editorconfig
+- **Use sealed classes** (e.g., `public sealed class`) for immutability and performance (suggested in .editorconfig)
+- **Use `var` for all applicable contexts** (enforced as error)
+- **Use expression-bodied properties/accessors** where appropriate
 
 ### Field Declarations
 - **Use private fields without underscore prefix**
@@ -34,7 +36,7 @@ ApifConfiguration is a strongly-typed, enforcing wrapper around `Microsoft.Exten
   // Bad
   private readonly IConfiguration _configuration;
   ```
-- **Always qualify all member access with `this.`** for clarity (fields, properties, methods, indexers)
+- **Always qualify all member access with `this.`** for clarity (fields, properties, methods, indexers, events) - enforced as error
   ```csharp
   // Good
   return this.Get(key);
@@ -48,7 +50,6 @@ ApifConfiguration is a strongly-typed, enforcing wrapper around `Microsoft.Exten
   var section = GetEnforcingSection(key);
   var optional = Optional;
   ```
-
 - **Use `ArgumentException.ThrowIfNullOrEmpty()`** for string parameters
 - **Use `ArgumentNullException.ThrowIfNull()`** for object parameters
 
